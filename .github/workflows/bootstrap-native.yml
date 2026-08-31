@@ -24,8 +24,17 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v3
+      - name: Update Android command-line tools
+        run: |
+          curl -fsSL "https://dl.google.com/android/repository/commandlinetools-linux-15859902_latest.zip" -o /tmp/cmdline-tools.zip
+          rm -rf "$ANDROID_HOME/cmdline-tools/latest"
+          mkdir -p "$ANDROID_HOME/cmdline-tools/latest" /tmp/android-cmdline
+          unzip -q /tmp/cmdline-tools.zip -d /tmp/android-cmdline
+          mv /tmp/android-cmdline/cmdline-tools/* "$ANDROID_HOME/cmdline-tools/latest/"
       - name: Install Android SDK 37
-        run: yes | sdkmanager --channel=3 "platforms;android-37" "build-tools;37.0.0" >/dev/null
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --channel=3 "platforms;android-37" "build-tools;37.0.0" >/dev/null
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.0'
